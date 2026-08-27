@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PrintFinance</title>
+<script src="auth.js"></script>
+<script>requireAuth();</script>
+<script src="storage.js"></script>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="logo">PrintFinance</div>
+  <div class="nav-links">
+    <div class="dropdown-wrap">
+      <div id="intervalToggle">DASHBOARD<br><span id="intervalNavLabel">DAY</span> ▾</div>
+      <div class="dropdown-menu" id="intervalDropdown">
+        <div data-interval="day" class="active">Day</div>
+        <div data-interval="month">Month</div>
+        <div data-interval="year">Year</div>
+      </div>
+    </div>
+    <div class="dropdown-wrap">
+      <div id="themeToggle">THEMES ▾</div>
+      <div class="dropdown-menu" id="themeDropdown">
+        <div data-theme="original">Original</div>
+        <div data-theme="dark">Dark Mode</div>
+        <div data-theme="sunset">Sunset</div>
+      </div>
+    </div>
+    <a href="settings.html">SETTINGS</a>
+    <div class="calc-label" id="calcToggle">Basic<br>Calculator 🖩</div>
+  </div>
+  <div class="user-block">
+    <div class="dropdown-wrap">
+      <div class="names" id="accountToggle">
+        <div id="currentUserName">Account</div>
+        <div>Manage Accounts ▾</div>
+      </div>
+      <div class="dropdown-menu account-menu" id="accountDropdown">
+        <div id="logoutBtn">Log Out</div>
+      </div>
+    </div>
+    <div class="avatar">👤</div>
+  </div>
+</div>
+
+<div class="dashboard">
+
+  <!-- LEFT PANEL -->
+  <div class="panel left-panel">
+    <div class="chart-wrap"><canvas id="pieChart"></canvas></div>
+    <div class="legend" id="legend"></div>
+    <div class="datetime">
+      <div class="time" id="timeNow"></div>
+      <div class="date" id="dateNow"></div>
+    </div>
+  </div>
+
+  <!-- MIDDLE LOG -->
+  <div class="panel log-panel" id="logPanel">
+    <div class="log-empty">No transactions yet — add a service or purchase to get started.</div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="stats-row">
+      <div class="stat-card revenue">
+        <div class="stat-label" id="revenueLabel">TODAY'S REVENUE</div>
+        <div class="stat-value" id="revenueVal">₱ 0.00</div>
+      </div>
+      <div class="stat-card expenses">
+        <div class="stat-label" id="expenseLabel">TODAY'S EXPENSES</div>
+        <div class="stat-value" id="expenseVal">₱ 0.00</div>
+      </div>
+    </div>
+    <div class="stat-card profit">
+      <div class="stat-label" id="profitLabel">TODAY'S PROFIT</div>
+      <div class="stat-value" id="profitVal">₱ 0.00</div>
+    </div>
+
+    <div class="form-box services">
+      <div class="form-title">Add Services:</div>
+      <div class="form-row">
+        <label>Services:</label>
+        <select id="serviceSelect">
+          <option value="">Option</option>
+          <option data-cat="Xerox">Xerox (B&W) Short</option>
+          <option data-cat="Xerox">Xerox (B&W) Long</option>
+          <option data-cat="Print">Print (Colored) Short</option>
+          <option data-cat="Print">Print (Colored) Long</option>
+          <option data-cat="Laminate">Laminate Short</option>
+          <option data-cat="Laminate">Laminate Long</option>
+          <option data-cat="Others">Others</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Quantity:</label>
+        <input type="number" id="serviceQty" placeholder="Type Input" min="1">
+      </div>
+      <div class="form-row">
+        <label>Price:</label>
+        <input type="number" id="servicePrice" placeholder="₱">
+      </div>
+      <div class="add-btn-row"><button class="add-btn" id="addServiceBtn">ADD+</button></div>
+    </div>
+
+    <div class="form-box purchase">
+      <div class="form-title">Add Purchase:</div>
+      <div class="form-row">
+        <label>Purchase:</label>
+        <select id="purchaseSelect">
+          <option value="">Option</option>
+          <option>Bond Paper (Short)</option>
+          <option>Bond Paper (Long)</option>
+          <option>Ink</option>
+          <option>Others</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Quantity:</label>
+        <input type="number" id="purchaseQty" placeholder="Type Input" min="1">
+      </div>
+      <div class="form-row">
+        <label>Price:</label>
+        <input type="number" id="purchasePrice" placeholder="₱">
+      </div>
+      <div class="add-btn-row"><button class="add-btn" id="addPurchaseBtn">ADD+</button></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BASIC CALCULATOR MODAL -->
+<div class="modal-overlay" id="calcOverlay">
+  <div class="calculator" id="calculator">
+    <div class="calc-header">
+      <span>Basic Calculator</span>
+      <button class="calc-close" id="calcClose">✕</button>
+    </div>
+    <div class="calc-display" id="calcDisplay">0</div>
+    <div class="calc-grid">
+      <button data-action="clear">C</button>
+      <button data-action="backspace">⌫</button>
+      <button data-action="percent">%</button>
+      <button data-op="/">÷</button>
+
+      <button data-num="7">7</button>
+      <button data-num="8">8</button>
+      <button data-num="9">9</button>
+      <button data-op="*">×</button>
+
+      <button data-num="4">4</button>
+      <button data-num="5">5</button>
+      <button data-num="6">6</button>
+      <button data-op="-">−</button>
+
+      <button data-num="1">1</button>
+      <button data-num="2">2</button>
+      <button data-num="3">3</button>
+      <button data-op="+">+</button>
+
+      <button data-num="0" class="wide">0</button>
+      <button data-action="decimal">.</button>
+      <button data-action="equals" class="equals">=</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+<script src="calculator.js"></script>
+</body>
+</html>
